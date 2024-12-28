@@ -61,20 +61,45 @@ class EnhancedSQLQueryGenerator:
 
         Return ONLY the SQL query without any additional text or explanations.
         """)
-    def format_indicators_for_prompt(self, indicators: Dict[str, List[Any]]) -> str:
+
+    def sanitize_indicator_name(self, name: str) -> str:
         """
-        Format indicators dictionary into a readable string for the prompt
+        Sanitize the indicator name while carefully handling complex quote formatting.
 
         Args:
-            indicators: Dictionary of indicators with their descriptions and scores
+            name: Raw indicator name as a string.
 
         Returns:
-            Formatted string of indicators with descriptions
+            Sanitized indicator name as a string.
         """
+        # Strip leading and trailing whitespace
+        name = name.strip()
+        
+        # Remove multiple consecutive single quotes at the start
+        while name.startswith("'") and name.count("'") > 1:
+            name = name.lstrip("'")
+        
+        # Remove multiple consecutive single quotes at the end
+        while name.endswith("'") and name.count("'") > 1:
+            name = name.rstrip("'")
+        
+        # Remove surrounding double quotes if present
+        if name.startswith('"') and name.endswith('"'):
+            name = name[1:-1]
+        
+        # Escape single quotes for SQL safety
+        name = name.replace("'", "''")
+        
+        return name.strip()
+
+    def format_indicators_for_prompt(self, indicators: Dict[str, List[Any]]) -> str:
         formatted_list = []
         for name, (description, score) in indicators.items():
-            formatted_list.append(f"- {name}\n  Description: {description}\n  Relevance Score: {score:.2f}")
+            sanitized_name = self.sanitize_indicator_name(name)
+            formatted_list.append(f"- {sanitized_name}\n  Description: {description}\n  Relevance Score: {score:.2f}")
         return "\n".join(formatted_list)
+
+
 
     def generate_query(
         self,
@@ -94,6 +119,7 @@ class EnhancedSQLQueryGenerator:
             Generated SQL query string
         """
         try:
+            
             # Format indicators for prompt
             indicators_details = self.format_indicators_for_prompt(indicators)
 
@@ -183,9 +209,9 @@ class EnhancedSQLQueryGenerator:
         # Basic syntax checks
         required_elements = [
             'SELECT',
-            'FROM moroccan_indicators',
+            'FROM MOROCCAN_INDICATORS',
             'WHERE',
-            'indicator_name IN'
+            'IN ('
         ]
 
         # Check all required elements are present
@@ -193,11 +219,22 @@ class EnhancedSQLQueryGenerator:
             if element.upper() not in query_upper:
                 return False
 
-        # Check all indicators are included
-        indicators_clause = query_upper.split('IN')[1].split(')')[0]
-        for indicator in indicator_names:
-            if indicator.upper() not in indicators_clause.upper():
-                return False
+        # More flexible indicator checking
+        try:
+            # Extract the IN clause and clean it
+            in_clause = query_upper.split('IN')[1].split(')')[0].replace('(', '').replace("'", '').strip()
+            indicators_in_query = [ind.strip() for ind in in_clause.split(',')]
+
+            # Sanitize both original and query indicators
+            sanitized_original = [self.sanitize_indicator_name(ind) for ind in indicator_names]
+            
+            # Check if all original indicators are represented in some form
+            for orig_ind in sanitized_original:
+                if not any(orig_ind.upper() in query_ind.upper() for query_ind in indicators_in_query):
+                    return False
+
+        except Exception:
+            return False
 
         return True
 
@@ -216,8 +253,11 @@ class EnhancedSQLQueryGenerator:
         Returns:
             Safe fallback query string
         """
+        # Sanitize indicators for the IN clause
+        sanitized_indicators = [self.sanitize_indicator_name(name) for name in indicator_names]
+
         # Format indicators for IN clause
-        indicators_str = "', '".join(indicator_names)
+        indicators_str = "', '".join(sanitized_indicators)
 
         # Determine year columns
         if year_range:
