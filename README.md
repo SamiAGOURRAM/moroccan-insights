@@ -106,20 +106,6 @@ The platform employs a sophisticated multi-stage pipeline to process raw data an
 
 ---
 
-## Installation  
-
-1. Clone the repository:  
-   ```bash  
-   git clone https://github.com/yourusername/moroccan-insights-rag.git  
-   ```  
-
-2. Install dependencies:  
-   ```bash  
-   pip install -r requirements.txt  
-   ```  
-
----
-
 ## Usage Example  
 
 You can either use the available website : https://moroccan-insights-cs.streamlit.app/
