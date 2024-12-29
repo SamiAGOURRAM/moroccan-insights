@@ -47,7 +47,7 @@ Our system employs a sophisticated multi-stage pipeline:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/moroccan-insights.git
+git clone https://github.com/SamiAGOURRAM/moroccan-insights.git
 cd moroccan-insights/morocco-economic-insights
 
 # Install dependencies
