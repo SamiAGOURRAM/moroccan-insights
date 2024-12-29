@@ -1,152 +1,161 @@
-# Moroccan Economic Insights: Advanced RAG System  
+# Moroccan Economic Insights: Advanced RAG System
 
-## Project Overview  
+## Table of Contents
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Technical Architecture](#technical-architecture)
+- [Installation Guide](#installation-guide)
+  - [Streamlit Application](#streamlit-application)
+  - [Local Development](#local-development)
+- [System Components](#system-components)
+  - [Data Pipeline](#data-pipeline)
+  - [Semantic Search](#semantic-search)
+  - [Query Generation](#query-generation)
+  - [Visualization Engine](#visualization-engine)
+- [Technical Stack](#technical-stack)
+- [Future Development](#future-development)
+- [Contributing](#contributing)
 
-The **Moroccan Economic Insights** platform is an advanced Retrieval-Augmented Generation (RAG) system designed to deliver actionable insights into Morocco's economy. By leveraging cutting-edge natural language processing, machine learning techniques, and semantic search, this tool transforms raw economic data into meaningful, interactive, and data-driven analyses.  
+## Overview
 
-You can use this RAG solution, available now on this link : https://moroccan-insights-cs.streamlit.app/
+The **Moroccan Economic Insights** platform is an advanced Retrieval-Augmented Generation (RAG) system designed to provide comprehensive, data-driven economic analysis. By integrating semantic search, large language models (LLMs), SQL query generation, and data visualization, this system transforms raw economic indicators into actionable insights.
 
-### Key Features  
+🔗 **Live Demo**: [Moroccan Insights Platform](https://moroccan-insights-cs.streamlit.app/)
 
-1. **Intelligent Data Retrieval**: Precise searches for contextually relevant economic indicators.  
-2. **Semantic Understanding**: Deep contextual analysis of economic metrics using state-of-the-art models.  
-3. **Adaptive Analysis**: Dynamic insights tailored to user-specific inquiries.  
-4. **Interactive Visualizations**: Data trends visualized for better comprehension and decision-making.  
-5. **User Accessibility**: Simplifies complex economic data for diverse user profiles, including researchers, policymakers, and investors.  
+## Key Features
 
----
+* **Intelligent Data Retrieval**: Semantic search powered by HNSW indexing
+* **Multilingual Processing**: Automatic translation and standardization of French-English content
+* **Dynamic SQL Generation**: Adaptive query generation using LangChain's SQL Agent
+* **Interactive Visualizations**: Rich, interactive plots using Plotly
+* **Parallel Processing**: Efficient handling of multiple indicators simultaneously
 
-## Technical Architecture  
+## Technical Architecture
 
-The platform employs a sophisticated multi-stage pipeline to process raw data and generate comprehensive insights.  
+Our system employs a sophisticated multi-stage pipeline:
 
-### Workflow Stages:  
+1. **Data Preprocessing**: Cleaning, translation, and standardization
+2. **Semantic Indexing**: HNSW-based embedding search
+3. **Query Processing**: Context-aware indicator extraction
+4. **SQL Generation**: Dynamic query construction
+5. **Analysis**: Parallel processing of indicators
+6. **Visualization**: Interactive data presentation
 
-1. **Data Preprocessing**  
-2. **Semantic Search**  
-3. **Indicator Extraction**  
-4. **Data Retrieval**  
-5. **Visualization**  
-6. **Insight Generation**  
+## Installation Guide
 
----
+### Streamlit Application
 
-## Deep Dive into Key Components  
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/moroccan-insights.git
+cd moroccan-insights/morocco-economic-insights
 
-### 1. Data Preparation  
+# Install dependencies
+pip install -r requirements.txt
 
-- **Source**: Economic data is fetched via the World Bank API (CSV for Morocco).  
-- **Preprocessing Steps**:  
-  - Translation of mixed-language texts (French to English).  
-  - Text summarization using a large language model (LLM).  
-  - Cleaning and filtering to ensure data relevance.  
-  - Standardization of economic indicator descriptions.  
+# Set up environment variables
+echo "GROQ_API_KEY=your_api_key_here" > .env
 
-#### Challenges Addressed  
-- Multilingual inconsistencies.  
-- Preservation of technical terminology.  
-- Noise reduction for better data usability.  
+# Launch the application
+streamlit run app.py
+```
 
----
+### Local Development
 
-### 2. Semantic Search Engine  
+For backend testing:
 
-#### **Indexing with HNSW**  
-- **Model**: `all-mpnet-base-v2` for high-quality embeddings.  
-- **Algorithm**: Hierarchical Navigable Small World (HNSW) Index for logarithmic search complexity and low computational cost.  
-
-#### **Two-Stage Retrieval**  
-1. **HNSW Nearest Neighbor Search**: Fast and scalable retrieval.  
-2. **Cross-Encoder Re-Ranking**: Contextual re-ranking with `cross-encoder/ms-marco-MiniLM-L-6-v2` to enhance result precision.  
-
-#### Unique Capabilities  
-- Dynamic indicator extraction.  
-- Metadata-enhanced queries.  
-- Flexible similarity thresholds for tailored searches.  
-
----
-
-### 3. Adaptive SQL Query Generator  
-
-- **Architecture**: Built with LangChain's SQL Agent for dynamic query generation.  
-- **Capabilities**:  
-  - Generates SQL queries based on extracted indicators and user inputs.  
-  - Handles complex queries with robust error fallback mechanisms.  
-  - Ensures flexibility in year ranges and metadata-rich query construction.  
-
----
-
-### 4. Visualization Strategy  
-
-- **Framework**: Interactive and aesthetically pleasing visualizations built using Plotly.  
-- **Key Features**:  
-  - Time series plots with trend lines and year-over-year changes.  
-  - Dynamic annotations for enhanced insights.  
-  - Parallel processing for efficient rendering of multiple indicators.  
-
----
-
-## Use Cases  
-
-- Economic research and analysis.  
-- Investment and market trend identification.  
-- Policy planning and decision-making.  
-
----
-
-## Technical Stack  
-
-| **Aspect**         | **Details**                                            |  
-|---------------------|--------------------------------------------------------|  
-| **Languages**       | Python                                                 |  
-| **Libraries**       | Sentence Transformers, HNSWLib, Plotly, Pandas, SQLAlchemy, LangChain |  
-| **Embedding Model** | `all-mpnet-base-v2`                                    |  
-| **Cross-Encoder**   | `ms-marco-MiniLM-L-6-v2`                               |  
-| **LLM**             | Groq Llama 70B (fast inference)                        |  
-
----
-
-## Usage Example  
-
-You can either use the available website : https://moroccan-insights-cs.streamlit.app/
-or the notebook in the repo.
+1. Navigate to the `notebooks` directory
+2. Ensure the CSV file in `data` directory is present in your environment
+3. Follow these steps:
 
 ```python
 
-    # Initialize components
-    db = SQLDatabase.from_uri("sqlite:////content/indicators.db")
-    query_generator = EnhancedSQLQueryGenerator(db=db, llm=llm)
+# Initialize components
+df = pd.read_csv("path_to_the_csv_file.csv")
+db = create_engine("sqlite:///indicators.db")
+query_generator = EnhancedSQLQueryGenerator(db=db, llm=llm)
+index_builder = OptimizedIndexBuilder(df, index_path='indicators_index')
 
-    question = "What are the top 3 indicators showing Morocco's technological advancement"
 
-    result = analyze_morocco_economy(
+question = "What are the top 3 indicators showing Morocco's technological advancement"
+
+result = analyze_morocco_economy(
         question=question,
         index_builder=index_builder,
         query_generator=query_generator,
         llm=llm
     )
 
-    display_analysis_results(result)
-    # Display all visualizations
-    for viz_name, fig in result['visualizations'].items():
+display_analysis_results(result)
+# Display all visualizations
+for viz_name, fig in result['visualizations'].items():
         print(f"\n{viz_name.upper()}:")
         fig.show()
-```  
+```
+
+## System Components
+
+### Data Pipeline
+- World Bank data preprocessing
+- Multilingual text harmonization
+- LLM-based summarization
+- Data cleaning and standardization
+
+### Semantic Search
+- Model: `all-mpnet-base-v2` embeddings
+- HNSW indexing for efficient retrieval
+- Cross-encoder reranking with `ms-marco-MiniLM-L-6-v2`
+- Dynamic similarity thresholds
+
+### Query Generation
+- LangChain SQL Agent integration
+- Robust error handling
+- Fallback query mechanisms
+- Context-aware query construction
+
+### Visualization Engine
+- Interactive Plotly visualizations
+- Time series analysis
+- Trend detection
+- Parallel processing capabilities
+
+## Technical Stack
+
+| Component | Technology |
+|-----------|------------|
+| Core Language | Python |
+| Embedding Model | `all-mpnet-base-v2` |
+| Cross-Encoder | `ms-marco-MiniLM-L-6-v2` |
+| LLM | Groq Llama 70B |
+| Key Libraries | Sentence Transformers, HNSWLib, Plotly, Pandas, SQLAlchemy, LangChain |
+| Database | SQLite |
+| Frontend | Streamlit |
+
+
+## Future Development
+
+1. Multi-country analysis support
+2. Advanced trend prediction models
+3. Enhanced visualization techniques
+4. Expanded multilingual capabilities
+5. Integration with online knowledge bases
+6. Real-time data updates
+7. API endpoint development
+
+## Contributing
+
+We welcome contributions! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+For bug reports or feature requests, please open an issue in the repository.
 
 ---
 
-## Future Roadmap  
-
-1. Expand support for multi-country analyses.  
-2. Integrate advanced trend prediction models.  
-3. Improve visualization techniques for deeper insights.  
-4. Increase multilingual support for better global applicability.
-5. Use available articles online to enhance the knowledge base
-
----
-
-## Contributing  
-
-Contributions are welcome! Feel free to submit issues or pull requests to enhance the project.  
-
----
+📊 **Project Status**: Active Development  
+📝 **License**: MIT  
+👥 **Contributors**: [Sami Agourram]
